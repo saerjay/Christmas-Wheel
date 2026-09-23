@@ -73,16 +73,16 @@
             background: #27ae60;
             color: white;
             border: 3px dashed white;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 25px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1rem;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: transform 0.2s;
+            gap: 8px;
+            transition: all 0.2s;
         }
 
         .festive-toggle-btn.off {
@@ -434,59 +434,113 @@
             }
         }
 
-        // Ticking Audio Effect
+        // Mechanical Wood Tick Effect
         function playTickSound() {
             if (!audioCtx) return;
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.04);
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.03);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.04);
+                osc.stop(audioCtx.currentTime + 0.03);
             } catch(e){}
         }
 
-        // Dominick Tune Loop Synthesizer
+        // Italian Acoustic Tarantella Music Engine
         let songTimer = null;
         let noteIndex = 0;
 
-        const DOMINICK_MELODY = [
-            {n: 67, d: 0.25}, {n: 67, d: 0.25}, {n: 67, d: 0.25}, {n: 69, d: 0.25}, {n: 67, d: 0.5},
-            {n: 64, d: 0.25}, {n: 64, d: 0.25}, {n: 64, d: 0.5},
-            {n: 65, d: 0.25}, {n: 65, d: 0.25}, {n: 65, d: 0.25}, {n: 67, d: 0.25}, {n: 65, d: 0.5},
-            {n: 62, d: 0.25}, {n: 62, d: 0.25}, {n: 62, d: 0.5}
+        // Dominick melody sequence in MIDI notes
+        const TARANTELLA_MELODY = [
+            // Verse - "Hey, Chingedy ching..."
+            {n: 67, d: 0.22, b: 55}, {n: 67, d: 0.22, b: 0}, {n: 67, d: 0.22, b: 60}, {n: 69, d: 0.22, b: 0}, {n: 67, d: 0.44, b: 55},
+            {n: 64, d: 0.22, b: 0}, {n: 64, d: 0.22, b: 60}, {n: 64, d: 0.44, b: 0},
+            {n: 65, d: 0.22, b: 55}, {n: 65, d: 0.22, b: 0}, {n: 65, d: 0.22, b: 60}, {n: 67, d: 0.22, b: 0}, {n: 65, d: 0.44, b: 55},
+            {n: 62, d: 0.22, b: 0}, {n: 62, d: 0.22, b: 60}, {n: 62, d: 0.44, b: 0},
+            // Chorus - "La la la..."
+            {n: 67, d: 0.22, b: 55}, {n: 72, d: 0.22, b: 0}, {n: 71, d: 0.22, b: 60}, {n: 69, d: 0.22, b: 0}, {n: 67, d: 0.44, b: 55},
+            {n: 65, d: 0.22, b: 0}, {n: 64, d: 0.22, b: 60}, {n: 62, d: 0.44, b: 0}
         ];
 
-        function mToFreq(m) {
+        function midiToHz(m) {
             return 440 * Math.pow(2, (m - 69) / 12);
+        }
+
+        // Smooth Acoustic Instrument Voice
+        function playAcousticNote(freq, duration, gainVal, type = 'sine') {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                // Soft acoustic envelope
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(gainVal, audioCtx.currentTime + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        // Tambourine Jingle Simulation
+        function playTambourine() {
+            if (!audioCtx) return;
+            try {
+                const bufferSize = audioCtx.sampleRate * 0.05;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = "highpass";
+                filter.frequency.value = 5000;
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                noise.start();
+            } catch(e){}
         }
 
         function playDominickStep() {
             if (!isFestive || !audioCtx) return;
 
-            const note = DOMINICK_MELODY[noteIndex];
-            noteIndex = (noteIndex + 1) % DOMINICK_MELODY.length;
+            const note = TARANTELLA_MELODY[noteIndex];
+            noteIndex = (noteIndex + 1) % TARANTELLA_MELODY.length;
 
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(mToFreq(note.n), audioCtx.currentTime);
-                
-                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + note.d);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + note.d);
-            } catch(e){}
+            // Warm accordion lead (sine + warm triangle blend)
+            playAcousticNote(midiToHz(note.n), note.d, 0.08, 'triangle');
+            playAcousticNote(midiToHz(note.n + 4), note.d * 0.8, 0.03, 'sine'); // Harmonics
+
+            // Acoustic Bass line
+            if (note.b > 0) {
+                playAcousticNote(midiToHz(note.b), note.d * 1.5, 0.09, 'sine');
+            }
+
+            // Rhythm Tambourine Accent
+            if (noteIndex % 2 === 0) {
+                playTambourine();
+            }
 
             songTimer = setTimeout(playDominickStep, note.d * 1000);
         }
