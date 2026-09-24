@@ -413,9 +413,18 @@
 
     <script>
         const ALL_NAMES = ["Mom", "Dad", "Brice", "Meghan", "Christina", "Dane", "Sarah", "Mostafa"];
-        const COLORS = ["#ff7675", "#74b9ff", "#55efc4", "#ffeaa7", "#a29bfe", "#fd79a8", "#fab1a0", "#81ecec"];
+        cconst COLORS = ["#ff7675", "#74b9ff", "#55efc4", "#ffeaa7", "#a29bfe", "#fd79a8", "#fab1a0", "#81ecec"];
 
-        let userAssignments = JSON.parse(localStorage.getItem('santa_assignments_2026') || '{}');
+// HARDCODED MATCHES - Pre-calculated to guarantee your pairing rules
+        const PRE_ASSIGNED_MATCHES = {
+            "Mom": "Brice",
+            "Brice": "Sarah",
+            "Sarah": "Dad",
+            "Dad": "Meghan",
+            "Meghan": "Dane",
+            "Dane": "Mostafa",
+            "Mostafa": "Christina",
+            "Christina": "Mom"};
         let isSpinning = false;
         let isFestive = false;
         let currentSegments = [];
@@ -619,8 +628,16 @@
         const spinBtn = document.getElementById('spinBtn');
 
         function updateAvailableTargets() {
-            const currentUser = userSelect.value;
-            if (!currentUser) return;
+        const currentUser = userSelect.value;
+        if (!currentUser) return;
+
+    // Fill the wheel with all other names to make the spin look real
+    currentSegments = ALL_NAMES.filter(name => name !== currentUser);
+    drawWheel();
+    
+    spinBtn.disabled = false;
+    spinBtn.innerText = "SPIN THE WHEEL!";
+}
 
             // Check if already spun
             if (userAssignments[currentUser]) {
@@ -651,7 +668,8 @@
             isSpinning = true;
             spinBtn.disabled = true;
 
-            const chosenTarget = currentSegments[Math.floor(Math.random() * currentSegments.length)];
+            // FORCE the wheel to land on the pre-assigned target
+            const chosenTarget = PRE_ASSIGNED_MATCHES[currentUser];
             const targetIndex = currentSegments.indexOf(chosenTarget);
 
             const numSegments = currentSegments.length;
@@ -687,8 +705,7 @@
                     requestAnimationFrame(animateSpin);
                 } else {
                     isSpinning = false;
-                    userAssignments[currentUser] = chosenTarget;
-                    localStorage.setItem('santa_assignments_2026', JSON.stringify(userAssignments));
+            
 
                     // Show Modal
                     document.getElementById('targetNameDisplay').innerText = chosenTarget;
