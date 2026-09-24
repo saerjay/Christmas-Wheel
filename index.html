@@ -413,7 +413,7 @@
 
     <script>
         const ALL_NAMES = ["Mom", "Dad", "Brice", "Meghan", "Christina", "Dane", "Sarah", "Mostafa"];
-        cconst COLORS = ["#ff7675", "#74b9ff", "#55efc4", "#ffeaa7", "#a29bfe", "#fd79a8", "#fab1a0", "#81ecec"];
+        const COLORS = ["#ff7675", "#74b9ff", "#55efc4", "#ffeaa7", "#a29bfe", "#fd79a8", "#fab1a0", "#81ecec"];
 
 // HARDCODED MATCHES - Pre-calculated to guarantee your pairing rules
         const PRE_ASSIGNED_MATCHES = {
@@ -429,6 +429,7 @@
         let isFestive = false;
         let currentSegments = [];
         let currentAngle = 0;
+        let userAssignments = {};
 
         // Web Audio Setup
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -631,6 +632,15 @@
         const currentUser = userSelect.value;
         if (!currentUser) return;
 
+    // Check if they already spun
+    if (userAssignments[currentUser]) {
+        currentSegments = [userAssignments[currentUser]];
+        drawWheel();
+        spinBtn.disabled = true;
+        spinBtn.innerText = "ALREADY SPUN!";
+        return;
+    }
+
     // Fill the wheel with all other names to make the spin look real
     currentSegments = ALL_NAMES.filter(name => name !== currentUser);
     drawWheel();
@@ -705,6 +715,13 @@
                     requestAnimationFrame(animateSpin);
                 } else {
                     isSpinning = false;
+                    
+                    // ADD THIS LINE TO SAVE THE SPIN:
+                    userAssignments[currentUser] = chosenTarget;
+
+                    // Show Modal
+                    document.getElementById('targetNameDisplay').innerText = chosenTarget;
+                    
             
 
                     // Show Modal
